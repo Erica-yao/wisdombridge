@@ -1,230 +1,240 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>听觉心理空间 比赛版</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
+    <title>智听心桥</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    
+    <div class="name-modal" id="nameModal">
+        <h1>智听心桥</h1>
+        <p class="subtle">基于听觉认知科学的心理韧性训练和认知健康管理平台</p>
+        <input type="text" id="nameInput" placeholder="请输入您的姓名">
+        <br>
+        <button id="startBtn">开始</button>
+    </div>
+
     <div class="app">
-      <header class="hero">
-        <div>
-          <p class="eyebrow">Contest Local Edition</p>
-          <h1>听觉心理空间</h1>
-          <p class="subtle">Windows 键盘 + 手机触摸兼容</p>
-        </div>
-        <div class="hero-actions">
-          <button id="playIntro" class="ghost">播放引导</button>
-          <div id="notice" class="notice" aria-live="polite">准备就绪</div>
-        </div>
-      </header>
-
-      <div class="page-bar">
-        <nav class="nav" aria-label="页面导航">
-          <button data-screen="home">首页</button>
-          <button data-screen="training">训练</button>
-          <button data-screen="assessment">检测</button>
-          <button data-screen="healing">疗愈</button>
-        </nav>
-        <div class="page-actions">
-          <button id="prevScreen" class="ghost">上一页</button>
-          <span id="screenTitle" class="screen-title">首页</span>
-          <button id="nextScreen" class="ghost">下一页</button>
-        </div>
-      </div>
-
-      <main class="screen-stack">
-        <section id="screen-home" class="screen active">
-          <div class="panel">
-            <div class="panel-title">
-              <h2>首页</h2>
-              <span id="deviceId" class="tag"></span>
+        <header class="hero">
+            <div>
+                <p class="eyebrow">wisdombridge</p>
+                <h1>智听心桥</h1>
+                <p class="subtle">基于听觉认知科学的心理韧性训练和认知健康管理平台</p>
             </div>
-            <div class="grid three">
-              <label class="card field">
-                <span>称呼</span>
-                <input id="nicknameInput" type="text" maxlength="20" />
-              </label>
-              <div class="card">
-                <span>节奏签名</span>
-                <strong id="tapSignatureLabel">未记录</strong>
-                <div class="row">
-                  <button id="storeTap">记录三击</button>
-                  <button id="verifyTap" class="ghost">校验</button>
+            <div class="hero-actions">
+                <button id="playIntro" class="ghost">播放引导</button>
+                <div id="notice" class="notice" aria-live="polite">准备就绪</div>
+            </div>
+        </header>
+
+        <div class="page-bar">
+            <nav class="nav" aria-label="页面导航">
+                <button data-screen="home" class="nav-btn">首页</button>
+                <button data-screen="training" class="nav-btn">训练</button>
+                <button data-screen="assessment" class="nav-btn">检测</button>
+                <button data-screen="healing" class="nav-btn">疗愈</button>
+            </nav>
+            <div class="page-actions">
+                <button id="prevScreen" class="ghost">上一页</button>
+                <span id="screenTitle" class="screen-title">首页</span>
+                <button id="nextScreen" class="ghost">下一页</button>
+            </div>
+        </div>
+
+        <main class="screen-stack">
+            <section id="screen-home" class="screen active">
+                <div class="panel">
+                    <div class="panel-title">
+                        <h2>首页</h2>
+                        <span id="deviceId" class="tag"></span>
+                    </div>
+                    <div class="grid three">
+                        <label class="card field">
+                            <span>称呼</span>
+                            <input id="nicknameInput" type="text" maxlength="20" />
+                        </label>
+                        <div class="card">
+                            <span>节奏签名</span>
+                            <strong id="tapSignatureLabel">未记录</strong>
+                            <div class="row">
+                                <button id="storeTap">记录三击</button>
+                                <button id="verifyTap" class="ghost">校验</button>
+                            </div>
+                            <small id="tapNotice">可作为匿名识别方式</small>
+                        </div>
+                        <div class="card">
+                            <span>最近成绩</span>
+                            <strong id="latestGrade">暂无</strong>
+                            <small>数据仅保存在当前浏览器</small>
+                        </div>
+                    </div>
+                    <div class="grid three">
+                        <button class="entry-card" data-screen="training">
+                            <span>第一页</span>
+                            <strong>认知训练</strong>
+                            <small>标准模式 / 游戏模式</small>
+                        </button>
+                        <button class="entry-card" data-screen="assessment">
+                            <span>第二页</span>
+                            <strong>注意力检测</strong>
+                            <small>单声道 Stroop 测试</small>
+                        </button>
+                        <button class="entry-card" data-screen="healing">
+                            <span>第三页</span>
+                            <strong>声景疗愈</strong>
+                            <small>30 / 60 分钟定时播放</small>
+                        </button>
+                    </div>
                 </div>
-                <small id="tapNotice">可作为匿名识别方式</small>
-              </div>
-              <div class="card">
-                <span>最近成绩</span>
-                <strong id="latestGrade">暂无</strong>
-                <small>数据仅保存在当前浏览器</small>
-              </div>
-            </div>
-            <div class="grid three">
-              <button class="entry-card" data-screen="training">
-                <span>第一页</span>
-                <strong>认知训练</strong>
-                <small>标准模式 / 游戏模式</small>
-              </button>
-              <button class="entry-card" data-screen="assessment">
-                <span>第二页</span>
-                <strong>注意力检测</strong>
-                <small>单声道 Stroop 测试</small>
-              </button>
-              <button class="entry-card" data-screen="healing">
-                <span>第三页</span>
-                <strong>声景疗愈</strong>
-                <small>30 / 60 分钟定时播放</small>
-              </button>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        <section id="screen-training" class="screen">
-          <div class="panel">
-            <div class="panel-title">
-              <h2>认知训练</h2>
-              <div class="row">
-                <button id="startTrainingStandard">标准训练</button>
-                <button id="startTrainingGame" class="accent">游戏训练</button>
-              </div>
-            </div>
-            <div class="grid two">
-              <div class="card">
-                <span>文字引导</span>
-                <p id="trainingGuideText">听到“滴”声后作答。只判断粗声或细声。</p>
-                <small>键盘：↑ 粗声，↓ 细声；触摸：点击下方两个大按钮</small>
-              </div>
-              <div class="card">
-                <span>状态</span>
-                <strong id="trainingStatus">待开始</strong>
-                <small id="trainingProgress">0 / 8</small>
-              </div>
-            </div>
-            <div class="answer-pad">
-              <button id="answerThickTraining" class="answer" aria-label="选项一">
-                <span id="trainingAnswerALabel">粗声</span>
-                <small>键盘 ↑ / 触摸左键</small>
-              </button>
-              <button id="answerThinTraining" class="answer" aria-label="选项二">
-                <span id="trainingAnswerBLabel">细声</span>
-                <small>键盘 ↓ / 触摸右键</small>
-              </button>
-            </div>
-            <div id="trainingMetrics" class="grid four"></div>
-          </div>
-        </section>
-
-        <section id="screen-assessment" class="screen">
-          <div class="panel">
-            <div class="panel-title">
-              <h2>注意力检测</h2>
-              <div class="row">
-                <button id="startAssessmentStandard">正式测评</button>
-                <button id="startAssessmentGame" class="ghost">游戏化测评</button>
-              </div>
-            </div>
-            <div class="grid four">
-              <label class="card field">
-                <span>焦虑</span>
-                <input id="anxietyRange" type="range" min="1" max="5" />
-                <strong id="anxietyValue"></strong>
-              </label>
-              <label class="card field">
-                <span>睡眠</span>
-                <input id="sleepRange" type="range" min="1" max="5" />
-                <strong id="sleepValue"></strong>
-              </label>
-              <label class="card field">
-                <span>切换</span>
-                <input id="attentionRange" type="range" min="1" max="5" />
-                <strong id="attentionValue"></strong>
-              </label>
-              <label class="card field">
-                <span>偏好</span>
-                <select id="colorPreference"></select>
-                <strong id="colorValue"></strong>
-              </label>
-            </div>
-            <div class="grid two">
-              <div class="card">
-                <span>文字引导</span>
-                <p id="assessmentGuideText">请听到“滴”声后开始作答。忽略词语意义，只判断音色是粗还是细。</p>
-                <small>适用于没有耳机的现场演示，旁观者可直接看本栏说明。</small>
-              </div>
-              <div class="card">
-                <span>状态</span>
-                <strong id="assessmentStatus">待开始</strong>
-                <small id="assessmentProgress">0 / 12</small>
-              </div>
-            </div>
-            <div class="answer-pad">
-              <button id="answerThickAssessment" class="answer" aria-label="选项一">
-                <span>粗声</span>
-                <small>键盘 ↑ / 触摸左键</small>
-              </button>
-              <button id="answerThinAssessment" class="answer" aria-label="选项二">
-                <span>细声</span>
-                <small>键盘 ↓ / 触摸右键</small>
-              </button>
-            </div>
-            <div class="grid report">
-              <div class="card report-card">
-                <span>报告</span>
-                <h3 id="reportHeadline">暂无</h3>
-                <p id="reportLayer">完成检测后生成</p>
-                <div class="row">
-                  <button id="prevLayer" class="ghost">上一层</button>
-                  <button id="nextLayer" class="ghost">下一层</button>
-                  <button id="speakReport" class="accent">播报报告</button>
+            <section id="screen-training" class="screen">
+                <div class="panel">
+                    <div class="panel-title">
+                        <h2>认知训练</h2>
+                        <div class="row">
+                            <button id="startTrainingStandard">标准训练</button>
+                            <button id="startTrainingGame" class="accent">游戏训练</button>
+                        </div>
+                    </div>
+                    <div class="grid two">
+                        <div class="card">
+                            <span>文字引导</span>
+                            <p id="trainingGuideText">听到“滴”声后作答。只判断粗声或细声。</p>
+                            <small>键盘：↑ 粗声，↓ 细声；触摸：点击下方两个大按钮</small>
+                        </div>
+                        <div class="card">
+                            <span>状态</span>
+                            <strong id="trainingStatus">待开始</strong>
+                            <small id="trainingProgress">0 / 8</small>
+                        </div>
+                    </div>
+                    <div class="answer-pad">
+                        <button id="answerThickTraining" class="answer" aria-label="选项一">
+                            <span id="trainingAnswerALabel">粗声</span>
+                            <small>键盘 ↑ / 触摸左键</small>
+                        </button>
+                        <button id="answerThinTraining" class="answer" aria-label="选项二">
+                            <span id="trainingAnswerBLabel">细声</span>
+                            <small>键盘 ↓ / 触摸右键</small>
+                        </button>
+                    </div>
+                    <div id="trainingMetrics" class="grid four"></div>
                 </div>
-              </div>
-              <div class="card">
-                <span>历史轨迹</span>
-                <svg id="trendChart" viewBox="0 0 300 140" aria-label="趋势图">
-                  <path d="M20 20 V120 H280" class="axis"></path>
-                  <polyline id="trendLine" class="trend-line"></polyline>
-                </svg>
-                <div id="historyList" class="history"></div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        <section id="screen-healing" class="screen">
-          <div class="panel">
-            <div class="panel-title">
-              <h2>声景疗愈</h2>
-              <div class="row">
-                <button id="startHealing30">30 分钟</button>
-                <button id="startHealing60">60 分钟</button>
-                <button id="startHealing5" class="ghost">5 分钟演示</button>
-              </div>
-            </div>
-            <div id="planList" class="grid three"></div>
-            <div class="row">
-              <button id="stopHealing" class="ghost">停止疗愈</button>
-            </div>
-          </div>
-        </section>
-      </main>
+            <section id="screen-assessment" class="screen">
+                <div class="panel">
+                    <div class="panel-title">
+                        <h2>注意力检测</h2>
+                        <div class="row">
+                            <button id="startAssessmentStandard">正式测评</button>
+                            <button id="startAssessmentGame" class="ghost">游戏化测评</button>
+                        </div>
+                    </div>
+                    <div class="grid four">
+                        <label class="card field">
+                            <span>焦虑</span>
+                            <input id="anxietyRange" type="range" min="1" max="5" />
+                            <strong id="anxietyValue"></strong>
+                        </label>
+                        <label class="card field">
+                            <span>睡眠</span>
+                            <input id="sleepRange" type="range" min="1" max="5" />
+                            <strong id="sleepValue"></strong>
+                        </label>
+                        <label class="card field">
+                            <span>切换</span>
+                            <input id="attentionRange" type="range" min="1" max="5" />
+                            <strong id="attentionValue"></strong>
+                        </label>
+                        <label class="card field">
+                            <span>偏好</span>
+                            <select id="colorPreference"></select>
+                            <strong id="colorValue"></strong>
+                        </label>
+                    </div>
+                    <div class="grid two">
+                        <div class="card">
+                            <span>文字引导</span>
+                            <p id="assessmentGuideText">请听到“滴”声后开始作答。忽略词语意义，只判断音色是粗还是细。</p>
+                            <small>适用于没有耳机的现场演示，旁观者可直接看本栏说明。</small>
+                        </div>
+                        <div class="card">
+                            <span>状态</span>
+                            <strong id="assessmentStatus">待开始</strong>
+                            <small id="assessmentProgress">0 / 12</small>
+                        </div>
+                    </div>
+                    <div class="answer-pad">
+                        <button id="answerThickAssessment" class="answer" aria-label="选项一">
+                            <span>粗声</span>
+                            <small>键盘 ↑ / 触摸左键</small>
+                        </button>
+                        <button id="answerThinAssessment" class="answer" aria-label="选项二">
+                            <span>细声</span>
+                            <small>键盘 ↓ / 触摸右键</small>
+                        </button>
+                    </div>
+                    <div class="grid report">
+                        <div class="card report-card">
+                            <span>报告</span>
+                            <h3 id="reportHeadline">暂无</h3>
+                            <p id="reportLayer">完成检测后生成</p>
+                            <div class="row">
+                                <button id="prevLayer" class="ghost">上一层</button>
+                                <button id="nextLayer" class="ghost">下一层</button>
+                                <button id="speakReport" class="accent">播报报告</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <span>历史轨迹</span>
+                            <svg id="trendChart" viewBox="0 0 300 140" aria-label="趋势图">
+                                <path d="M20 20 V120 H280" class="axis"></path>
+                                <polyline id="trendLine" class="trend-line"></polyline>
+                            </svg>
+                            <div id="historyList" class="history"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-healing" class="screen">
+                <div class="panel">
+                    <div class="panel-title">
+                        <h2>声景疗愈</h2>
+                        <div class="row">
+                            <button id="startHealing30">30 分钟</button>
+                            <button id="startHealing60">60 分钟</button>
+                            <button id="startHealing5" class="ghost">5 分钟演示</button>
+                        </div>
+                    </div>
+                    <div id="planList" class="grid three"></div>
+                    <div class="row">
+                        <button id="stopHealing" class="ghost">停止疗愈</button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <div id="healingOverlay" class="overlay hidden" role="dialog" aria-modal="true">
-      <div class="overlay-card">
-        <div class="orb"></div>
-        <p class="eyebrow">声景进行中</p>
-        <h3 id="overlayTitle"></h3>
-        <p id="overlaySubtitle"></p>
-        <strong id="overlayCountdown">00:00</strong>
-        <div class="row centered">
-          <button id="overlayStop">停止</button>
-          <button id="overlayBack" class="ghost">返回检测页</button>
+        <div class="overlay-card">
+            <div class="orb"></div>
+            <p class="eyebrow">声景进行中</p>
+            <h3 id="overlayTitle"></h3>
+            <p id="overlaySubtitle"></p>
+            <strong id="overlayCountdown">00:00</strong>
+            <div class="row centered">
+                <button id="overlayStop">停止</button>
+                <button id="overlayBack" class="ghost">返回检测页</button>
+            </div>
         </div>
-      </div>
     </div>
 
+    
     <script src="./app.js"></script>
-  </body>
+</body>
 </html>
