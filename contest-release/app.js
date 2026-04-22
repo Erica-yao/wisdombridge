@@ -3,10 +3,35 @@
   const SCREENS = ['home', 'training', 'assessment', 'healing']
   const SCREEN_TITLES = { home: '首页', training: '认知训练', assessment: '注意力检测', healing: '声景疗愈' }
   const COLORS = { warm_wood: '温暖木质', soft_sun: '柔亮日光', silver_bell: '清亮铃声', deep_night: '低频夜色' }
-  const INTRO = '欢迎来到听觉心理空间。可以通过首页、训练、检测和疗愈四页逐页操作。'
+  const INTRO = '欢迎来到听觉心理空间。可以通过首页、训练、检测和疗愈四页逐页操作。左箭头表示前一页，右箭头表示下一页'
+  /*const HOME_INTRO = '首页包含您的个人信息和最近成绩，可以记录节奏签名作为匿名识别方式。'
+  const TRAINING_INTRO = '训练页面提供标准训练和游戏训练两种模式，通过听觉认知训练提高注意力。'
+  const ASSESSMENT_INTRO = '检测页面进行注意力检测，完成后会生成个人报告和建议。'
+  const HEALING_INTRO = '疗愈页面提供多种声景疗愈方案，帮助您放松身心。'*/
   const BODY_SCAN = '请放松肩膀，把注意力放在呼吸上，从额头到肩颈，再到双手。'
   const $ = (id) => document.getElementById(id)
   const $$ = (s) => Array.from(document.querySelectorAll(s))
+  // 定义各页面的引导文本
+const NAV_INTROS = {
+  home: '首页包含您的个人信息和最近成绩，可以记录节奏签名作为匿名识别方式。',
+  training: '训练页面提供标准训练和游戏训练两种模式，通过听觉认知训练提高注意力。',
+  assessment: '检测页面进行注意力检测，完成后会生成个人报告和建议。',
+  healing: '疗愈页面提供多种声景疗愈方案，帮助您放松身心。'
+};
+const BUTTON_INTROS = {
+  startTrainingStandard: '标准训练模式',
+  startTrainingGame: '游戏训练模式',
+  startAssessmentStandard: '正式测评模式',
+  startAssessmentGame: '游戏化测评模式',
+  speakReport: '播报当前检测报告，包括等级、得分和建议。',
+  startHealing30: '开始30分钟的声景疗愈，帮助您放松身心。',
+  startHealing60: '开始60分钟的声景疗愈，深度放松身心。',
+  startHealing5: '开始5分钟的声景疗愈演示，体验放松效果。',
+  stopHealing: '停止当前的声景疗愈。',
+  overlayStop: '停止当前的声景疗愈。',
+  overlayBack: '停止声景疗愈并返回检测页面。',
+  startBtn: '欢迎来到听觉心理空间。可以通过首页、训练、检测和疗愈四页逐页操作。左箭头表示前一页，右箭头表示下一页'
+};
   const app = {
     state: loadState(),
     screen: 'home',
@@ -35,6 +60,9 @@
     planList: $('planList'), healingOverlay: $('healingOverlay'), overlayTitle: $('overlayTitle'),
     overlaySubtitle: $('overlaySubtitle'), overlayCountdown: $('overlayCountdown'),
     trainingA: $('answerThickTraining'), trainingB: $('answerThinTraining'), assessmentA: $('answerThickAssessment'), assessmentB: $('answerThinAssessment'),
+    nameModal: $('nameModal'),
+    nameInput: $('nameInput'),
+    startBtn: $('startBtn')
   }
 
   init()
@@ -46,18 +74,64 @@
       o.textContent = COLORS[k]
       el.colorPreference.appendChild(o)
     })
+    bindNameModalEvents()
     bind()
     renderAll()
   }
 
+  function bindNameModalEvents() {
+    if (!el.nameModal || !el.startBtn || !el.nameInput) return
+    
+    el.startBtn.addEventListener('click', handleNameModalSubmit)
+    el.nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        handleNameModalSubmit()
+      }
+    })
+  }
+
+  function handleNameModalSubmit() {
+    const name = el.nameInput.value.trim();
+    if (!name) {
+      alert('请输入您的姓名！');
+      return;
+    }
+
+    const audio = $('#welcomeAudio');
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(err => console.error('播放失败', err));
+    }
+
+    app.state.hasPlayedWelcome = true;
+    saveState();
+    
+    app.state.profile.nickname = name.charAt(0) + '同学'
+    saveState()
+    renderProfile()
+    el.nameModal.classList.add('hidden')
+  }
+
+  function playWelcomeAudio() {
+  }
+
   function bind() {
     $('playIntro').addEventListener('click', () => speak(INTRO))
+    // 为导航按钮绑定点击事件
+$$('.nav-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const screen = btn.dataset.screen;
+    if (NAV_INTROS[screen]) {
+      speak(NAV_INTROS[screen]);
+    }
+  });
+});
     $$('[data-screen]').forEach((b) => b.addEventListener('click', () => switchScreen(b.dataset.screen)))
     $('prevScreen').addEventListener('click', () => moveScreen(-1))
     $('nextScreen').addEventListener('click', () => moveScreen(1))
     $('storeTap').addEventListener('click', () => recordTap('store'))
     $('verifyTap').addEventListener('click', () => recordTap('verify'))
-    el.nicknameInput.addEventListener('input', (e) => { app.state.profile.nickname = e.target.value || '访客'; saveState(); renderProfile() })
+    el.nicknameInput.addEventListener('input', (e) => { app.state.profile.nickname = e.target.value ? e.target.value.charAt(0) + '同学' : '访客'; saveState(); renderProfile() })
     el.anxietyRange.addEventListener('input', (e) => { app.state.questionnaire.anxietyLevel = Number(e.target.value); saveState(); renderQuestionnaire() })
     el.sleepRange.addEventListener('input', (e) => { app.state.questionnaire.sleepDifficulty = Number(e.target.value); saveState(); renderQuestionnaire() })
     el.attentionRange.addEventListener('input', (e) => { app.state.questionnaire.attentionSwitching = Number(e.target.value); saveState(); renderQuestionnaire() })
@@ -85,18 +159,44 @@
       if (e.key === 'ArrowUp') { e.preventDefault(); handleAnswer('thick') }
       if (e.key === 'ArrowDown') { e.preventDefault(); handleAnswer('thin') }
     })
+    Object.keys(BUTTON_INTROS).forEach(buttonId => {
+    const button = $(buttonId);
+    if (button) {
+      button.addEventListener('click', () => {
+        speak(BUTTON_INTROS[buttonId]);
+      });
+    }
+  });
   }
 
   function loadState() {
-    const base = { profile: { deviceId: randomId(), nickname: '访客', tapSignature: [] }, questionnaire: { anxietyLevel: 2, sleepDifficulty: 2, attentionSwitching: 2, colorPreference: 'warm_wood' }, sessions: [] }
+    const base = {
+      profile: { deviceId: randomId(), nickname: '访客', tapSignature: [] },
+      questionnaire: { anxietyLevel: 2, sleepDifficulty: 2, attentionSwitching: 2, colorPreference: 'warm_wood' },
+      sessions: [],
+      hasPlayedWelcome: false
+    }
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
       if (!parsed) return base
-      return { profile: Object.assign({}, base.profile, parsed.profile || {}), questionnaire: Object.assign({}, base.questionnaire, parsed.questionnaire || {}), sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [] }
+      return {
+        profile: Object.assign({}, base.profile, parsed.profile || {}),
+        questionnaire: Object.assign({}, base.questionnaire, parsed.questionnaire || {}),
+        sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
+        hasPlayedWelcome: parsed.hasPlayedWelcome || false
+      }
     } catch { return base }
   }
 
-  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(app.state)) }
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      profile: app.state.profile,
+      questionnaire: app.state.questionnaire,
+      sessions: app.state.sessions,
+      hasPlayedWelcome: app.state.hasPlayedWelcome
+    }))
+  }
+
   function randomId() { return 'APS-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase() }
   function clone(v) { return JSON.parse(JSON.stringify(v)) }
   function notice(text) { el.notice.textContent = text }
@@ -104,11 +204,15 @@
   function average(list) { return list.length ? Math.round(list.reduce((a, b) => a + b, 0) / list.length) : 0 }
   function formatDate(iso) { return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
 
-  function switchScreen(screen) {
-    if (!SCREENS.includes(screen)) return
-    app.screen = screen
-    renderScreenState()
+ function switchScreen(screen, playIntro = false) {
+  if (!SCREENS.includes(screen)) return
+  app.screen = screen
+  renderScreenState()
+  // 只在用户主动导航时播放引导提示
+  if (playIntro && NAV_INTROS && NAV_INTROS[screen]) {
+    speak(NAV_INTROS[screen]);
   }
+}
 
   function moveScreen(delta) {
     const i = SCREENS.indexOf(app.screen)
@@ -249,7 +353,10 @@
     app.run = { kind: kind, status: 'priming', mode: mode, stimuli: createStimuli(kind === 'training' ? 8 : 12), currentIndex: -1, responseStartAt: null, results: [] }
     switchScreen(kind)
     notice(kind === 'training' ? '训练开始' : '检测开始')
-    speak('请听到滴声后作答。粗声按上，细声按下。')
+    // 延迟3秒后播放语音提示
+    setTimeout(() => {
+      speak('请听到滴声后作答。粗声按上，细声按下。')
+    }, 3000)
     renderTraining()
     renderAssessment()
     scheduleNextTrial(1100)
