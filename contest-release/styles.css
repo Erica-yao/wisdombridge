@@ -386,3 +386,112 @@ small,
     grid-template-columns: 1fr;
   }
 }
+/* 原有样式保持不变，新增以下内容 */
+/* 姓名输入弹窗样式（适配主风格） */
+.name-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* 确保弹窗在最上层 */
+    background: var(--panel);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(16px);
+    padding: 40px 60px;
+    text-align: center;
+    border-radius: 18px;
+    width: min(520px, calc(100vw - 32px));
+}
+
+.name-modal h1 {
+    font-size: clamp(32px, 6vw, 48px);
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.name-modal .subtle {
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: var(--muted);
+}
+
+#nameInput {
+    width: 100%;
+    max-width: 280px;
+    height: 48px;
+    line-height: 48px;
+    text-align: center;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    border-radius: 18px;
+    margin-bottom: 20px;
+    outline: none;
+    padding: 0 16px;
+}
+
+#nameInput::placeholder {
+    color: var(--muted);
+    opacity: 0.9;
+}
+
+#startBtn {
+    width: 140px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    background: linear-gradient(135deg, rgba(240, 177, 100, 0.34), rgba(255, 132, 84, 0.28));
+    color: var(--text);
+    border-radius: 18px;
+    cursor: pointer;
+    padding: 0;
+}
+
+#startBtn:hover {
+    border-color: rgba(240, 177, 100, 0.5);
+}
+
+/* 隐藏弹窗的类（复用已有样式） */
+.name-modal.hidden {
+    display: none;
+}
+
+/* 响应式适配 */
+@media (max-width: 640px) {
+    .name-modal {
+        padding: 30px 20px;
+    }
+    
+    #nameInput {
+        max-width: 100%;
+    }
+}
+
+/* 确保弹窗隐藏逻辑生效 
+.hidden {
+  display: none !important;
+}
+/* 可选：优化弹窗样式，避免遮挡 
+.name-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  gap: 16px;
+  padding: 20px;
+}
+.name-modal input, .name-modal button {
+  padding: 8px 16px;
+  font-size: 16px;
+  min-width: 200px;
+}*/
