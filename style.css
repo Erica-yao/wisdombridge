@@ -1,0 +1,497 @@
+:root {
+  color-scheme: dark;
+  --panel: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.14);
+  --text: #f7f6ef;
+  --muted: #bbb3a3;
+  --accent: #f0b164;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(240, 177, 100, 0.14), transparent 28%),
+    linear-gradient(180deg, #090909 0%, #050505 100%);
+  color: var(--text);
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+body {
+  padding: 16px;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-radius: 18px;
+}
+
+button {
+  cursor: pointer;
+  padding: 12px 16px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 14px;
+}
+
+button:hover {
+  border-color: rgba(240, 177, 100, 0.5);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(240, 177, 100, 0.85);
+  outline-offset: 3px;
+}
+
+.app {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.hero,
+.panel,
+.page-bar {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(16px);
+  border-radius: 18px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.hero h1,
+.panel h2,
+.panel h3,
+.panel p {
+  margin: 0;
+}
+
+.hero h1 {
+  font-size: clamp(40px, 8vw, 72px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.subtle,
+small,
+.card span,
+.tag {
+  color: var(--muted);
+}
+
+.hero-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.notice {
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 18px;
+}
+
+.page-bar,
+.panel {
+  padding: 14px 16px;
+}
+
+.page-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nav,
+.row,
+.page-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav button,
+.ghost {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nav button.active,
+.accent {
+  background: linear-gradient(135deg, rgba(240, 177, 100, 0.34), rgba(255, 132, 84, 0.28));
+}
+
+.screen-title {
+  min-width: 88px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.screen-stack {
+  position: relative;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.panel-title {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.report {
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+}
+
+.card,
+.entry-card {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.card strong,
+.entry-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.field {
+  display: grid;
+  gap: 10px;
+}
+
+.entry-card {
+  text-align: left;
+  min-height: 140px;
+}
+
+.answer-pad {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.answer {
+  min-height: 140px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.answer span {
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.answer.active {
+  border-color: rgba(240, 177, 100, 0.65);
+  box-shadow: 0 0 0 1px rgba(240, 177, 100, 0.24);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.history {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.history button {
+  width: 100%;
+  text-align: left;
+}
+
+.history .active-item,
+.plan-item.active-item {
+  border-color: rgba(240, 177, 100, 0.6);
+}
+
+#trendChart {
+  width: 100%;
+  height: auto;
+}
+
+.axis {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1.5;
+}
+
+.trend-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.96);
+}
+
+.hidden {
+  display: none;
+}
+
+.overlay-card {
+  width: min(520px, calc(100vw - 32px));
+  text-align: center;
+}
+
+.overlay-card h3,
+.overlay-card p {
+  margin: 0 0 10px;
+}
+
+.overlay-card strong {
+  display: block;
+  font-size: clamp(44px, 9vw, 76px);
+  letter-spacing: 0.08em;
+  margin: 8px 0 14px;
+}
+
+.centered {
+  justify-content: center;
+}
+
+.orb {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240, 177, 100, 0.44), rgba(255, 132, 84, 0.02));
+  box-shadow: 0 0 120px rgba(240, 177, 100, 0.34);
+  animation: breathe 5s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.84);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .page-bar,
+  .two,
+  .three,
+  .four,
+  .report {
+    grid-template-columns: 1fr;
+  }
+
+  .hero,
+  .page-bar,
+  .panel-title {
+    display: grid;
+  }
+
+  .page-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 10px;
+  }
+
+  .hero,
+  .panel,
+  .page-bar {
+    padding: 14px;
+  }
+
+  .answer-pad {
+    grid-template-columns: 1fr;
+  }
+}
+/* 原有样式保持不变，新增以下内容 */
+/* 姓名输入弹窗样式（适配主风格） */
+.name-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* 确保弹窗在最上层 */
+    background: var(--panel);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(16px);
+    padding: 40px 60px;
+    text-align: center;
+    border-radius: 18px;
+    width: min(520px, calc(100vw - 32px));
+}
+
+.name-modal h1 {
+    font-size: clamp(32px, 6vw, 48px);
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.name-modal .subtle {
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: var(--muted);
+}
+
+#nameInput {
+    width: 100%;
+    max-width: 280px;
+    height: 48px;
+    line-height: 48px;
+    text-align: center;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    border-radius: 18px;
+    margin-bottom: 20px;
+    outline: none;
+    padding: 0 16px;
+}
+
+#nameInput::placeholder {
+    color: var(--muted);
+    opacity: 0.9;
+}
+
+#startBtn {
+    width: 140px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    background: linear-gradient(135deg, rgba(240, 177, 100, 0.34), rgba(255, 132, 84, 0.28));
+    color: var(--text);
+    border-radius: 18px;
+    cursor: pointer;
+    padding: 0;
+}
+
+#startBtn:hover {
+    border-color: rgba(240, 177, 100, 0.5);
+}
+
+/* 隐藏弹窗的类（复用已有样式） */
+.name-modal.hidden {
+    display: none;
+}
+
+/* 响应式适配 */
+@media (max-width: 640px) {
+    .name-modal {
+        padding: 30px 20px;
+    }
+    
+    #nameInput {
+        max-width: 100%;
+    }
+}
+
+/* 确保弹窗隐藏逻辑生效 
+.hidden {
+  display: none !important;
+}
+/* 可选：优化弹窗样式，避免遮挡 
+.name-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  gap: 16px;
+  padding: 20px;
+}
+.name-modal input, .name-modal button {
+  padding: 8px 16px;
+  font-size: 16px;
+  min-width: 200px;
+}*/
