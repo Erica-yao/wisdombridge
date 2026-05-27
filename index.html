@@ -31,10 +31,10 @@
 
         <div class="page-bar">
             <nav class="nav" aria-label="页面导航">
-                <button data-screen="home" class="nav-btn">首页</button>
-                <button data-screen="training" class="nav-btn">训练</button>
-                <button data-screen="assessment" class="nav-btn">检测</button>
-                <button data-screen="healing" class="nav-btn">疗愈</button>
+                <button data-screen="home" class="nav-btn" id="home1">首页</button>
+                <button data-screen="training" class="nav-btn" id="training1">训练</button>
+                <button data-screen="assessment" class="nav-btn" id="assessment1">检测</button>
+                <button data-screen="healing" class="nav-btn" id="healing1">疗愈</button>
             </nav>
             <div class="page-actions">
                 <button id="prevScreen" class="ghost">上一页</button>
@@ -48,6 +48,7 @@
                 <div class="panel">
                     <div class="panel-title">
                         <h2>首页</h2>
+                        <span id="deviceId" class="tag"></span>
                     </div>
                     <div class="grid three">
                         <label class="card field">
@@ -61,29 +62,29 @@
                                 <button id="storeTap">记录三击</button>
                                 <button id="verifyTap" class="ghost">校验</button>
                             </div>
-                            <small id="tapNotice">可作为匿名识别方式</small>
+                            <small id="tapNotice">这里会记录下您自己独特的节奏感，就像一个声音名片。</small>
                         </div>
                         <div class="card">
                             <span>最近成绩</span>
                             <strong id="latestGrade">暂无</strong>
-                            <small>数据仅保存在当前浏览器</small>
+                            <small>点这里可以听一听您之前训练和测试的分数变化</small>
                         </div>
                     </div>
                     <div class="grid three">
                         <button class="entry-card" data-screen="training">
                             <span>第一页</span>
                             <strong>认知训练</strong>
-                            <small>标准模式 / 游戏模式</small>
+                            <small>这是一个听声音粗还是细的小游戏，用来锻炼大脑的反应力</small>
                         </button>
                         <button class="entry-card" data-screen="assessment">
                             <span>第二页</span>
                             <strong>注意力检测</strong>
-                            <small>单声道 Stroop 测试</small>
+                            <small>这里会测试您的注意力，检测您能否不被词语意思分心。</small>
                         </button>
                         <button class="entry-card" data-screen="healing">
                             <span>第三页</span>
                             <strong>声景疗愈</strong>
-                            <small>30 / 60 分钟定时播放</small>
+                            <small>点这里可以播放让您放松心情的声音。</small>
                         </button>
                     </div>
                 </div>
@@ -94,6 +95,7 @@
                     <div class="panel-title">
                         <h2>认知训练</h2>
                         <div class="row">
+                            <button id="starttestStandard">练习</button>
                             <button id="startTrainingStandard">标准训练</button>
                             <button id="startTrainingGame" class="accent">游戏训练</button>
                         </div>
@@ -129,6 +131,7 @@
                     <div class="panel-title">
                         <h2>注意力检测</h2>
                         <div class="row">
+                            <button id="startAssessment-testStandard">练习</button>
                             <button id="startAssessmentStandard">正式测评</button>
                             <button id="startAssessmentGame" class="ghost">游戏化测评</button>
                         </div>
@@ -144,11 +147,7 @@
                             <input id="sleepRange" type="range" min="1" max="5" />
                             <strong id="sleepValue"></strong>
                         </label>
-                        <label class="card field">
-                            <span>切换</span>
-                            <input id="attentionRange" type="range" min="1" max="5" />
-                            <strong id="attentionValue"></strong>
-                        </label>
+                      
                         <label class="card field">
                             <span>偏好</span>
                             <select id="colorPreference"></select>
@@ -233,8 +232,7 @@
         </div>
     </div>
 
-    <audio id="welcomeAudio" src="audio/welcome.mp3" preload="auto"></audio>
-
+    
     <script src="./app.js"></script>
 </body>
 </html>
