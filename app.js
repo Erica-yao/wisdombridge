@@ -3,22 +3,19 @@
   const SCREENS = ['home', 'training', 'assessment', 'healing']
   const SCREEN_TITLES = { home: '首页', training: '认知训练', assessment: '注意力检测', healing: '声景疗愈' }
   const COLORS = { warm_wood: '温暖木质', soft_sun: '柔亮日光', silver_bell: '清亮铃声', deep_night: '低频夜色' }
-  const INTRO = '欢迎来到听觉心理空间。可以通过首页、训练、检测和疗愈四页逐页操作。左箭头表示前一页，右箭头表示下一页'
-  /*const HOME_INTRO = '首页包含您的个人信息和最近成绩，可以记录节奏签名作为匿名识别方式。'
-  const TRAINING_INTRO = '训练页面提供标准训练和游戏训练两种模式，通过听觉认知训练提高注意力。'
-  const ASSESSMENT_INTRO = '检测页面进行注意力检测，完成后会生成个人报告和建议。'
-  const HEALING_INTRO = '疗愈页面提供多种声景疗愈方案，帮助您放松身心。'*/
+  const INTRO ='您现在在首页，这里有三个功能可以选。按键盘 F 键，进入认知训练，听声音粗细来训练大脑的反应力。按键盘 J 键，进入注意力检测，考验一下抗干扰能力。按键盘 空格键，进入声景疗愈，用自然的声音放松心情。请根据您的需要进行选择。'
+ 
   const BODY_SCAN = '请放松肩膀，把注意力放在呼吸上，从额头到肩颈，再到双手。'
   const $ = (id) => document.getElementById(id)
   const $$ = (s) => Array.from(document.querySelectorAll(s))
-  // 定义各页面的引导文本
-const NAV_INTROS = {
-  home: '首页包含您的个人信息和最近成绩，可以记录节奏签名作为匿名识别方式。',
-  training: '训练页面提供标准训练和游戏训练两种模式，通过听觉认知训练提高注意力。',
-  assessment: '检测页面进行注意力检测，完成后会生成个人报告和建议。',
-  healing: '疗愈页面提供多种声景疗愈方案，帮助您放松身心。'
-};
+  
 const BUTTON_INTROS = {
+  home1: '首页包含您的个人信息和最近成绩，可以记录节奏签名作为匿名识别方式。',
+  training1: '这里是认知训练，通过听声音粗细的小游戏，帮您锻炼大脑的反应力。操作说明： 请您戴上耳机，一会您会听到一个声音。觉得声音比较粗，就按键盘的上方向键；觉得声音比较细，就按键盘的下方向键。咱们先尝试四次练习（按g键开始练习）。按enter开始正式训练，按k开始游戏训练。祝您训练愉快！',
+  assessment1: '这里会测试您的注意力，检测您能否不被词语意思分心。请您注意，这个游戏只认声音的高和低。不管耳机里说的是“大象”还是“小鸟”，也不管说的是“高音”还是“低音”，这些词的意思都别管。规则是这样的：如果您听到的声音 音调高（像小鸟叫那种尖尖的声音），就按键盘的 下方向键。如果您听到的声音 音调低（像大象走路那种闷闷的声音），就按键盘的 上方向键。记住，只认声音高还是低，不用管词语的意思。准备好了就开始。咱们先尝试四次练习（按h键开始练习）。按enter开始正式训练，按k开始游戏训练。祝您训练愉快！检测页面进行注意力检测，完成后会生成个人报告和建议。',
+  healing1: '疗愈页面提供多种声景疗愈方案，帮助您放松身心。a键30分钟，w键60分钟，d键5分钟。escape键可以停止疗愈。祝您疗愈愉快！',
+  starttestStandard: '练习模式',
+  startAssessmentTestStandard: '练习模式',
   startTrainingStandard: '标准训练模式',
   startTrainingGame: '游戏训练模式',
   startAssessmentStandard: '正式测评模式',
@@ -28,10 +25,17 @@ const BUTTON_INTROS = {
   startHealing60: '开始60分钟的声景疗愈，深度放松身心。',
   startHealing5: '开始5分钟的声景疗愈演示，体验放松效果。',
   stopHealing: '停止当前的声景疗愈。',
+ 
   overlayStop: '停止当前的声景疗愈。',
   overlayBack: '停止声景疗愈并返回检测页面。',
-  startBtn: '欢迎来到听觉心理空间。可以通过首页、训练、检测和疗愈四页逐页操作。左箭头表示前一页，右箭头表示下一页'
+  startBtn: '音频13'//'您现在在首页，这里有三个功能可以选。按键盘 F 键，进入认知训练，听声音粗细来训练大脑的反应力。按键盘 J 键，进入注意力检测，考验一下抗干扰能力。按键盘 空格键，进入声景疗愈，用自然的声音放松心情。全局暂停键请用escape键，请根据您的需要进行选择。'
 };
+ const BUTTON_KEYS = {
+    'f': 'training1',
+    'j': 'assessment1',
+    ' ': 'healing1',
+    'h': 'home1'
+  };
   const app = {
     state: loadState(),
     screen: 'home',
@@ -44,6 +48,9 @@ const BUTTON_INTROS = {
     timers: { cue: null, response: null, healing: null },
     overlaySeconds: 0,
     speechVersion: 0,
+    speechPaused: false,
+    speechPausedAt: 0,
+    speechPausedDuration: 0,
     audioContext: null,
     soundscapeStop: null,
     soundscapeIntervals: [],
@@ -51,8 +58,8 @@ const BUTTON_INTROS = {
   const el = {
     notice: $('notice'), screenTitle: $('screenTitle'), deviceId: $('deviceId'), nicknameInput: $('nicknameInput'),
     tapSignatureLabel: $('tapSignatureLabel'), tapNotice: $('tapNotice'), latestGrade: $('latestGrade'),
-    anxietyRange: $('anxietyRange'), sleepRange: $('sleepRange'), attentionRange: $('attentionRange'), colorPreference: $('colorPreference'),
-    anxietyValue: $('anxietyValue'), sleepValue: $('sleepValue'), attentionValue: $('attentionValue'), colorValue: $('colorValue'),
+    anxietyRange: $('anxietyRange'), sleepRange: $('sleepRange'),  colorPreference: $('colorPreference'),
+    anxietyValue: $('anxietyValue'), sleepValue: $('sleepValue'), colorValue: $('colorValue'),
     trainingGuideText: $('trainingGuideText'), trainingStatus: $('trainingStatus'), trainingProgress: $('trainingProgress'),
     trainingAnswerALabel: $('trainingAnswerALabel'), trainingAnswerBLabel: $('trainingAnswerBLabel'), trainingMetrics: $('trainingMetrics'),
     assessmentGuideText: $('assessmentGuideText'), assessmentStatus: $('assessmentStatus'), assessmentProgress: $('assessmentProgress'),
@@ -77,6 +84,22 @@ const BUTTON_INTROS = {
     bindNameModalEvents()
     bind()
     renderAll()
+    
+    // 自动锁定输入框，方便盲人用户使用
+    if (el.nameInput) {
+      el.nameInput.focus();
+    }
+    
+    // 添加点击屏幕播放欢迎语音的功能
+    function playWelcomeMessage() {
+      speak('欢迎使用智听心桥。请先输入您的姓名。');
+      // 移除事件监听器，避免重复播放
+      document.removeEventListener('click', playWelcomeMessage);
+    }
+    
+    // 添加点击事件监听器
+    document.addEventListener('click', playWelcomeMessage);
+  
   }
 
   function bindNameModalEvents() {
@@ -97,14 +120,6 @@ const BUTTON_INTROS = {
       return;
     }
 
-    const audio = $('#welcomeAudio');
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(err => console.error('播放失败', err));
-    }
-
-    app.state.hasPlayedWelcome = true;
-    saveState();
     
     app.state.profile.nickname = name.charAt(0) + '同学'
     saveState()
@@ -112,18 +127,17 @@ const BUTTON_INTROS = {
     el.nameModal.classList.add('hidden')
   }
 
-  function playWelcomeAudio() {
-  }
+  
 
   function bind() {
     $('playIntro').addEventListener('click', () => speak(INTRO))
+    $('starttestStandard').addEventListener('click', startPracticeTrial)
+    $('startAssessment-testStandard').addEventListener('click', startAssessmentPractice)
     // 为导航按钮绑定点击事件
 $$('.nav-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     const screen = btn.dataset.screen;
-    if (NAV_INTROS[screen]) {
-      speak(NAV_INTROS[screen]);
-    }
+    
   });
 });
     $$('[data-screen]').forEach((b) => b.addEventListener('click', () => switchScreen(b.dataset.screen)))
@@ -134,7 +148,6 @@ $$('.nav-btn').forEach((btn) => {
     el.nicknameInput.addEventListener('input', (e) => { app.state.profile.nickname = e.target.value ? e.target.value.charAt(0) + '同学' : '访客'; saveState(); renderProfile() })
     el.anxietyRange.addEventListener('input', (e) => { app.state.questionnaire.anxietyLevel = Number(e.target.value); saveState(); renderQuestionnaire() })
     el.sleepRange.addEventListener('input', (e) => { app.state.questionnaire.sleepDifficulty = Number(e.target.value); saveState(); renderQuestionnaire() })
-    el.attentionRange.addEventListener('input', (e) => { app.state.questionnaire.attentionSwitching = Number(e.target.value); saveState(); renderQuestionnaire() })
     el.colorPreference.addEventListener('change', (e) => { app.state.questionnaire.colorPreference = e.target.value; saveState(); renderQuestionnaire(); renderHealing() })
     $('startTrainingStandard').addEventListener('click', () => startRun('training', 'standard'))
     $('startTrainingGame').addEventListener('click', () => startRun('training', 'game'))
@@ -153,12 +166,130 @@ $$('.nav-btn').forEach((btn) => {
     $('stopHealing').addEventListener('click', stopHealing)
     $('overlayStop').addEventListener('click', stopHealing)
     $('overlayBack').addEventListener('click', () => { stopHealing(); switchScreen('assessment') })
+
+
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); moveScreen(-1) }
-      if (e.key === 'ArrowRight') { e.preventDefault(); moveScreen(1) }
-      if (e.key === 'ArrowUp' || (app.run.mode === 'game' && e.key === 'ArrowLeft')) { e.preventDefault(); handleAnswer('thick') }
-      if (e.key === 'ArrowDown' || (app.run.mode === 'game' && e.key === 'ArrowRight')) { e.preventDefault(); handleAnswer('thin') }
-    })
+  // 防止在输入框、下拉框中触发快捷键
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+  const key = e.key.toLowerCase();
+
+  // 方向键通用功能
+  if (e.key === 'ArrowLeft') { e.preventDefault(); moveScreen(-1) }
+  if (e.key === 'ArrowRight') { e.preventDefault(); moveScreen(1) }
+  if (e.key === 'ArrowUp') { e.preventDefault(); handleAnswer('thick') }
+  if (e.key === 'ArrowDown') { e.preventDefault(); handleAnswer('thin') }
+
+  // 导航快捷键
+  if (key === 'z') { e.preventDefault(); switchScreen('home') }
+  if (key === 'f') { e.preventDefault(); switchScreen('training') }
+  if (key === 'j') { e.preventDefault(); switchScreen('assessment') }
+  if (key === ' ') { e.preventDefault(); switchScreen('healing') }
+
+
+
+    // ====================== 疗愈悬浮窗（overlay）快捷键 ======================
+  if (!el.healingOverlay.classList.contains('hidden')) {
+    // ESC = 暂停并进入后评估
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      // 不调用 overlayStop，而是调用疗愈暂停并进入后评估
+      if (typeof pauseHealingAndAssess === 'function') {
+        pauseHealingAndAssess();
+      } else {
+        $('overlayStop')?.click(); // 降级方案
+      }
+    }
+    // Z = 返回检测页（完全退出）
+    if (key === 'z') {
+      e.preventDefault();
+      $('overlayBack')?.click();
+    }
+    return;
+}
+
+
+  // Escape 暂停语音
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    app.speechPaused = !app.speechPaused;
+    if (app.speechPaused) {
+      app.speechPausedAt = Date.now();
+      window.speechSynthesis.pause();
+      notice("语音已暂停");
+    } else {
+      if (app.speechPausedAt > 0) {
+        app.speechPausedDuration += Date.now() - app.speechPausedAt;
+        app.speechPausedAt = 0;
+      }
+      window.speechSynthesis.resume();
+      notice("语音已恢复");
+    }
+  }
+
+  // ====================== 训练页面快捷键 ======================
+  if (app.screen === 'training') {
+    switch (key) {
+      case 'g':
+        e.preventDefault();
+        $('starttestStandard')?.click();
+        break;
+      case 'enter':
+        e.preventDefault();
+        $('startTrainingStandard')?.click();
+        break;
+      case 'k':
+        e.preventDefault();
+        $('startTrainingGame')?.click();
+        break;
+    }
+  }
+
+  // ====================== 测评页面快捷键 ======================
+  if (app.screen === 'assessment') {
+    switch (key) {
+      case 'h':
+        e.preventDefault();
+        $('startAssessment-testStandard')?.click();
+        break;
+      case 'enter':
+        e.preventDefault();
+        $('startAssessmentStandard')?.click();
+        break;
+      case 'k':
+        e.preventDefault();
+        $('startAssessmentGame')?.click();
+        break;
+    }
+  }
+
+
+  // ====================== 声景疗愈快捷键 ======================
+  if (app.screen === 'healing') {
+    if (e.key === 'a') {
+      e.preventDefault();
+      $('startHealing30')?.click();
+    }
+    if (e.key === 'w') {
+      e.preventDefault();
+      $('startHealing60')?.click();
+    }
+    if (e.key === 'd') {
+      e.preventDefault();
+      $('startHealing5')?.click();
+    }
+  }
+})
+    //为了让每个section能分别使用快捷键（165-254)
+
+
+const BUTTON_KEYS = {
+  'z': 'home1',
+  'f': 'training1',
+  'j': 'assessment1',
+  ' ': 'healing1',
+};
     Object.keys(BUTTON_INTROS).forEach(buttonId => {
     const button = $(buttonId);
     if (button) {
@@ -168,11 +299,35 @@ $$('.nav-btn').forEach((btn) => {
     }
   });
   }
+ // --- 快捷键触发首页按钮播报 ---
+  document.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    const buttonId = BUTTON_KEYS[key];
+    if (buttonId) {
+      const button = $(buttonId);
+      if (button) {
+        speak(BUTTON_INTROS[buttonId]);
+        button.focus();
+        navigateToScreen(button.dataset.screen || buttonId.replace(/\d+$/, ''));
+      }
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+  const key = event.key.toLowerCase(); // 支持大小写
+  const buttonId = BUTTON_KEYS[key];
+  if (buttonId) {
+    const button = $(buttonId);
+    if (button) {
+      speak(BUTTON_INTROS[buttonId]); // 同点击效果
+      button.focus(); // 可选，让按钮获得焦点
+    }
+  }
+});
 
   function loadState() {
     const base = {
       profile: { deviceId: randomId(), nickname: '访客', tapSignature: [] },
-      questionnaire: { anxietyLevel: 2, sleepDifficulty: 2, attentionSwitching: 2, colorPreference: 'warm_wood' },
+      questionnaire: { anxietyLevel: 2, sleepDifficulty: 2,  colorPreference: 'warm_wood' },
       sessions: [],
       hasPlayedWelcome: false
     }
@@ -204,14 +359,13 @@ $$('.nav-btn').forEach((btn) => {
   function average(list) { return list.length ? Math.round(list.reduce((a, b) => a + b, 0) / list.length) : 0 }
   function formatDate(iso) { return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
 
- function switchScreen(screen, playIntro = false) {
+  function switchScreen(screen) {
   if (!SCREENS.includes(screen)) return
   app.screen = screen
   renderScreenState()
-  // 只在用户主动导航时播放引导提示
-  if (playIntro && NAV_INTROS && NAV_INTROS[screen]) {
-    speak(NAV_INTROS[screen]);
-  }
+
+
+ 
 }
 
   function moveScreen(delta) {
@@ -237,6 +391,7 @@ $$('.nav-btn').forEach((btn) => {
 
   function renderProfile() {
     const latest = app.state.sessions[0]
+    el.deviceId.textContent = app.state.profile.deviceId
     el.nicknameInput.value = app.state.profile.nickname
     el.tapSignatureLabel.textContent = app.state.profile.tapSignature.length ? app.state.profile.tapSignature.join(' / ') + ' ms' : '未记录'
     el.latestGrade.textContent = latest ? latest.report.grade + ' / ' + latest.stroop.attentionScore + ' 分' : '暂无'
@@ -246,11 +401,11 @@ $$('.nav-btn').forEach((btn) => {
     const q = app.state.questionnaire
     el.anxietyRange.value = q.anxietyLevel
     el.sleepRange.value = q.sleepDifficulty
-    el.attentionRange.value = q.attentionSwitching
+    //el.attentionRange.value = q.attentionSwitching
     el.colorPreference.value = q.colorPreference
     el.anxietyValue.textContent = q.anxietyLevel + ' / 5'
     el.sleepValue.textContent = q.sleepDifficulty + ' / 5'
-    el.attentionValue.textContent = q.attentionSwitching + ' / 5'
+    //el.attentionValue.textContent = q.attentionSwitching + ' / 5'
     el.colorValue.textContent = COLORS[q.colorPreference]
   }
 
@@ -356,10 +511,106 @@ $$('.nav-btn').forEach((btn) => {
     setTimeout(() => {
       speak('请听到滴声后作答。粗声按上，细声按下。')
     }, 3000)
+   setTimeout(() => {
     renderTraining()
     renderAssessment()
-    scheduleNextTrial(1100)
+    scheduleNextTrial(0) // 立即开始第一个试次
+  },15000)
   }
+// 练习模式：逐题手动触发，4种固定声音循环
+function startPracticeTrial() {
+  clearRunTimers();
+  cancelSpeech();
+
+  // 固定4种题库：高音大象、高音小鸟、低音大象、低音小鸟
+  const practiceStimuli = [
+    { id: "p1", spokenWord: "高", targetTimbre: "thick", congruent: false },
+    { id: "p2", spokenWord: "高", targetTimbre: "thin", congruent: true },
+    { id: "p3", spokenWord: "低", targetTimbre: "thick", congruent: true },
+    { id: "p4", spokenWord: "低", targetTimbre: "thin", congruent: false },
+  ];
+
+  // 循环轮流出题
+  window.practiceIndex = window.practiceIndex ?? 0;
+  const current = practiceStimuli[window.practiceIndex];
+  window.practiceIndex = (window.practiceIndex + 1) % 4;
+
+  // 完全克隆标准训练的运行结构，但只跑 1 题
+  app.run = {
+    kind: "training",
+    status: "priming",
+    mode: "standard",
+    stimuli: [current], // 只一题
+    currentIndex: -1,
+    responseStartAt: null,
+    results: [],
+  };
+
+  switchScreen("training");
+  notice("练习开始");
+
+  
+  setTimeout(() => {
+    speak("粗音按上，细音按下");
+  }, 1000);
+
+  setTimeout(() => {
+    speak("请听声音，判断粗声或细声。");
+  }, 2000);
+
+  setTimeout(() => {
+    renderTraining();
+    renderAssessment();
+    scheduleNextTrial(0);
+  }, 10000);
+}    // 练习模式：逐题手动触发，4种固定声音循环
+
+
+
+// 测评页面 - 练习按钮（逐题模式）
+function startAssessmentPractice() {
+  clearRunTimers();
+  cancelSpeech();
+
+  // 固定4种题库：高音大象、高音小鸟、低音大象、低音小鸟
+  const practiceStimuli = [
+    { id: "a1", spokenWord: "高", targetTimbre: "thick", congruent: false },
+    { id: "a2", spokenWord: "高", targetTimbre: "thin", congruent: true },
+    { id: "a3", spokenWord: "低", targetTimbre: "thick", congruent: true },
+    { id: "a4", spokenWord: "低", targetTimbre: "thin", congruent: false },
+  ];
+
+  // 循环轮流出题
+  window.assessmentPracticeIndex = window.assessmentPracticeIndex ?? 0;
+  const current = practiceStimuli[window.assessmentPracticeIndex];
+  window.assessmentPracticeIndex = (window.assessmentPracticeIndex + 1) % 4;
+
+  // 克隆正式测评结构，只跑1题
+  app.run = {
+    kind: "assessment",
+    status: "priming",
+    mode: "standard",
+    stimuli: [current], // 只1题
+    currentIndex: -1,
+    responseStartAt: null,
+    results: [],
+  };
+
+  switchScreen("assessment");
+  notice("练习开始");
+
+  setTimeout(() => {
+    speak("请听声音，判断粗声还是细声。");
+  }, 2000);
+
+  setTimeout(() => {
+    renderAssessment();
+    scheduleNextTrial(0);
+  }, 10000);
+}
+//stroop的练习模式：逐题手动触发
+
+
 
   function clearRunTimers() {
     if (app.timers.cue) clearTimeout(app.timers.cue)
@@ -457,11 +708,11 @@ $$('.nav-btn').forEach((btn) => {
   }
 
   function buildReport(stroop, q) {
-    const resilienceIndex = clamp(Math.round(stroop.attentionScore * 0.72 + (6 - q.anxietyLevel) * 6 + (6 - q.sleepDifficulty) * 5 + (6 - q.attentionSwitching) * 4), 35, 98)
+    const resilienceIndex = clamp(Math.round(stroop.attentionScore * 0.72 + (6 - q.anxietyLevel) * 6 + (6 - q.sleepDifficulty) * 5 ), 35, 98)
     const grade = resilienceIndex >= 92 ? 'A' : resilienceIndex >= 84 ? 'A-' : resilienceIndex >= 76 ? 'B+' : resilienceIndex >= 68 ? 'B' : resilienceIndex >= 60 ? 'C+' : 'C'
-    const weakness = q.anxietyLevel >= 4 ? '主要失分项在于焦虑情绪，您容易被情绪干扰注意力。' : q.sleepDifficulty >= 4 ? '主要失分项在于睡眠质量，睡眠不足影响了您的注意力表现。' : q.attentionSwitching >= 4 ? '主要失分项在于注意力切换，您在任务转换时需要更多时间。' : stroop.interferenceIndex > 160 ? '主要失分项在于选择性注意，您容易被周围的无关声音干扰。' : '整体表现平稳，没有明显短板。'
+    const weakness = q.anxietyLevel >= 4 ? '焦虑牵引偏强。' : q.sleepDifficulty >= 4 ? '睡眠准备不足。'  : stroop.interferenceIndex > 160 ? '听觉冲突抑制偏弱。' : '整体平稳。'
     const plans = buildHealingPlans(stroop, q)
-    return { grade: grade, resilienceIndex: resilienceIndex, weakness: weakness, layers: ['您本次测评的综合认知韧性指数为 ' + grade + '。', weakness, '建议进入疗愈小屋，尝试‘' + plans.primaryPlan.title + '’声景进行15分钟的听觉放松训练。'], primaryPlan: plans.primaryPlan, secondaryPlans: plans.secondaryPlans }
+    return { grade: grade, resilienceIndex: resilienceIndex, weakness: weakness, layers: ['综合等级 ' + grade + '，得分 ' + resilienceIndex + '。', '当前短板：' + weakness, '建议进入“' + plans.primaryPlan.title + '”。'], primaryPlan: plans.primaryPlan, secondaryPlans: plans.secondaryPlans }
   }
 
   function buildHealingPlans(stroop, q) {
@@ -469,7 +720,7 @@ $$('.nav-btn').forEach((btn) => {
     if (stroop.averageReactionTime > 800 || stroop.errorCount > 5) list.push({ kind: 'stream', title: '森林溪流', subtitle: '减负', rationale: '先降低听觉负荷' })
     if (q.anxietyLevel >= 4) list.push({ kind: 'bodyScan', title: '身体扫描', subtitle: '接地', rationale: '优先放松身体' })
     if (q.sleepDifficulty >= 4) list.push({ kind: 'theta', title: 'Theta 放松', subtitle: '助眠', rationale: '节律更平稳' })
-    if (q.attentionSwitching >= 4) list.push({ kind: 'metronome', title: '节律白噪', subtitle: '聚焦', rationale: '帮助稳住节奏' })
+    //if (q.attentionSwitching >= 4) list.push({ kind: 'metronome', title: '节律白噪', subtitle: '聚焦', rationale: '帮助稳住节奏' })
     if (!list.length) list.push({ kind: 'stream', title: '自然声景', subtitle: '平衡', rationale: '默认方案' })
     return { primaryPlan: list[0], secondaryPlans: list.slice(1) }
   }
@@ -486,36 +737,199 @@ $$('.nav-btn').forEach((btn) => {
     r.layers.forEach((line) => { chain = chain.then(() => speak(line)) })
   }
 
-  function stopHealing() {
-    if (app.timers.healing) clearInterval(app.timers.healing)
-    app.timers.healing = null
-    if (app.soundscapeStop) app.soundscapeStop()
-    app.soundscapeStop = null
-    stopIntervals()
-    cancelSpeech()
-    app.overlaySeconds = 0
-    el.healingOverlay.classList.add('hidden')
+
+function stopHealing(skipPostAssessment = false) {
+  if (app.timers.healing) clearInterval(app.timers.healing);
+  app.timers.healing = null;
+  if (app.soundscapeStop) app.soundscapeStop();
+  app.soundscapeStop = null;
+  stopIntervals();
+  cancelSpeech();
+  app.overlaySeconds = 0;
+  el.healingOverlay.classList.add('hidden');
+
+  // 修复：疗愈结束移除按键监听（但如果需要后评估，则不移除）
+  if (skipPostAssessment && app.healingKeyDownListener) {
+    document.removeEventListener('keydown', app.healingKeyDownListener);
+    app.healingKeyDownListener = null;
+  }
+}
+
+function startHealing(minutes) {
+ 
+  startHealingFlow();
+}
+
+function startHealingFlow(container)  {
+  stopHealing(true); // 完全停止，不保留监听器
+  
+  let scores = { anxiety: null, fatigue: null };
+  let step = 1;
+  let healingMinutes = null;
+  let healingPlan = null;
+  let isInHealing = false; // 标记是否正在进行疗愈
+
+  // 先解绑旧监听
+  if (app.healingKeyDownListener) {
+    document.removeEventListener('keydown', app.healingKeyDownListener);
   }
 
-  function startHealing(minutes) {
-    const plan = getAvailablePlans().find((p) => p.kind === app.selectedPlanKind) || getAvailablePlans()[0]
-    stopHealing()
-    switchScreen('healing')
-    startSoundscape(plan.kind).then((stop) => {
-      app.soundscapeStop = stop
-      app.overlaySeconds = minutes * 60
-      el.overlayTitle.textContent = plan.title
-      el.overlaySubtitle.textContent = plan.subtitle
-      el.healingOverlay.classList.remove('hidden')
-      updateOverlay()
-      if (plan.kind === 'bodyScan') speak(BODY_SCAN)
-      app.timers.healing = setInterval(() => {
-        app.overlaySeconds -= 1
-        updateOverlay()
-        if (app.overlaySeconds <= 0) stopHealing()
-      }, 1000)
-    })
+  // 定义全局可访问的暂停函数（用于 ESC 键）
+  window.pauseHealingAndAssess = function() {
+    if (isInHealing) {
+      // 停止疗愈但保留键盘监听器
+      if (app.timers.healing) {
+        clearInterval(app.timers.healing);
+        app.timers.healing = null;
+      }
+      if (app.soundscapeStop) {
+        app.soundscapeStop();
+        app.soundscapeStop = null;
+      }
+      stopIntervals();
+      cancelSpeech();
+      app.overlaySeconds = 0;
+      el.healingOverlay.classList.add('hidden');
+      
+      isInHealing = false;
+      // 进入后评估阶段
+      enterPostAssessment();
+    } else {
+      // 如果不在疗愈中，直接完全退出
+      if (app.healingKeyDownListener) {
+        document.removeEventListener('keydown', app.healingKeyDownListener);
+        app.healingKeyDownListener = null;
+      }
+      window.pauseHealingAndAssess = null;
+    }
+  };
+
+  function askQuestion1() {
+    speak('欢迎来到声景疗愈。在开始放松之前，想请您给自己的状态打个分，满分是5分。第一个问题：您现在觉得焦虑、紧张的程度有多高？1分是完全不焦虑，5分是极度焦虑。请您按键盘上的数字 1 到 5 来打分。');
+    step = 1;
   }
+
+  function askQuestion2() {
+    speak('第二个问题：您现在觉得疲劳、困倦的程度有多高？1分是精神饱满，5分是非常疲惫。请您按键盘上的数字 1 到 5 来打分。');
+    step = 2;
+  }
+
+  function askDuration() {
+    speak('好的，分数记下了。现在请您选一个想放松的时间。按键盘d键是5分钟，按a键是30分钟，按w键是1个小时。在听音乐的过程中，随时按ESC可以停止。');
+    step = 3;
+  }
+
+  function startHealingWithDuration(minutes) {
+    healingMinutes = minutes;
+    const plan = getAvailablePlans().find((p) => p.kind === app.selectedPlanKind) || getAvailablePlans()[0];
+    healingPlan = plan;
+    isInHealing = true;
+    
+    switchScreen('healing');
+
+    startSoundscape(plan.kind).then((stop) => {
+      app.soundscapeStop = stop;
+      app.overlaySeconds = minutes * 60;
+      el.overlayTitle.textContent = plan.title;
+      el.overlaySubtitle.textContent = plan.subtitle;
+      el.healingOverlay.classList.remove('hidden');
+      updateOverlay();
+
+      if (plan.kind === 'bodyScan') speak(BODY_SCAN);
+
+      app.timers.healing = setInterval(() => {
+        app.overlaySeconds -= 1;
+        updateOverlay();
+        if (app.overlaySeconds <= 0) {
+          // 自然结束，进入后评估
+          if (app.timers.healing) clearInterval(app.timers.healing);
+          app.timers.healing = null;
+          if (app.soundscapeStop) {
+            app.soundscapeStop();
+            app.soundscapeStop = null;
+          }
+          el.healingOverlay.classList.add('hidden');
+          isInHealing = false;
+          enterPostAssessment();
+        }
+      }, 1000);
+    });
+  }
+
+
+ 
+  // 进入后评估阶段
+  function enterPostAssessment() {
+    step = 4;
+    speak('疗愈结束了。咱们再打一次分看看变化。第一个问题：现在的焦虑、紧张程度是几分？请按1到5。');
+  }
+
+  // 完成所有评估，给出最终反馈
+  function finishHealing() {
+    const anxietyChange = Math.max(0, scores.anxiety - (scores.anxietyAfter || scores.anxiety));
+    if (anxietyChange >= 2) {
+      speak('感觉您放松了不少，真为您高兴。欢迎您随时再回来听听，歇一歇。下次再见。');
+    } else {
+      speak('这次放松练习的时间可能稍微短了点，身体还没来得及充分反应。您可以再去训练页面玩一玩声音游戏，或者再来一次更长时间的疗愈，多练习几次效果会更好。');
+    }
+    step = 5;
+    // 延迟后完全清理
+    setTimeout(() => {
+      if (app.healingKeyDownListener) {
+        document.removeEventListener('keydown', app.healingKeyDownListener);
+        app.healingKeyDownListener = null;
+      }
+      window.pauseHealingAndAssess = null;
+    }, 8000);
+  }
+
+  function onKeyDown(event) {
+    // 步骤1：焦虑评分
+    if (step === 1 && /^[1-5]$/.test(event.key)) {
+      scores.anxiety = parseInt(event.key);
+      askQuestion2();
+    }
+    // 步骤2：疲劳评分
+    else if (step === 2 && /^[1-5]$/.test(event.key)) {
+      scores.fatigue = parseInt(event.key);
+      askDuration();
+    }
+    // 步骤3：选择时长
+    else if (step === 3) {
+      if (event.key === 'd') {
+        speak('开始5分钟疗愈');
+        startHealingWithDuration(5);
+      } else if (event.key === 'a') {
+        speak('开始30分钟疗愈');
+        startHealingWithDuration(30);
+      } else if (event.key === 'w') {
+        speak('开始1小时疗愈');
+        startHealingWithDuration(60);
+      } else if (event.key === 'Escape') {
+        // 在还没开始疗愈时按ESC，直接退出整个流程
+        speak('已取消疗愈');
+        if (app.healingKeyDownListener) {
+          document.removeEventListener('keydown', app.healingKeyDownListener);
+          app.healingKeyDownListener = null;
+        }
+        window.pauseHealingAndAssess = null;
+      }
+    }
+    // 步骤4：后评估阶段
+    else if (step === 4 && /^[1-5]$/.test(event.key)) {
+      scores.anxietyAfter = parseInt(event.key);
+      finishHealing();
+    }
+  }
+
+  app.healingKeyDownListener = onKeyDown;
+  document.addEventListener('keydown', onKeyDown);
+
+  askQuestion1();
+}
+
+
+
 
   function updateOverlay() {
     const m = String(Math.max(0, Math.floor(app.overlaySeconds / 60))).padStart(2, '0')
@@ -523,17 +937,34 @@ $$('.nav-btn').forEach((btn) => {
     el.overlayCountdown.textContent = m + ':' + s
   }
 
-  function cancelSpeech() { if (window.speechSynthesis) { app.speechVersion += 1; window.speechSynthesis.cancel() } }
-  function speak(text, opts) {
+ function cancelSpeech() { 
+    if (window.speechSynthesis) { 
+      app.speechVersion += 1; 
+      window.speechSynthesis.cancel();
+      // 重置暂停状态
+      app.speechPaused = false;
+      app.speechPausedAt = 0;
+      app.speechPausedDuration = 0;
+    } 
+  }
+    function speak(text, opts) {
     if (!window.speechSynthesis) return Promise.resolve()
+      // 保存当前语音
+  app.currentSpeech = text;
+  app.speechStartTime = Date.now();
+  app.speechPausedDuration = 0;
     const version = ++app.speechVersion
     return new Promise((resolve) => {
       const u = new SpeechSynthesisUtterance(text)
       u.lang = 'zh-CN'
       u.pitch = (opts && opts.pitch) || 1
       u.rate = (opts && opts.rate) || 1
-      u.onend = () => { if (version === app.speechVersion) resolve() }
-      u.onerror = () => resolve()
+
+      u.onend = () => { if (version === app.speechVersion) { app.currentSpeech = null; resolve()} }
+       u.onerror = () => {
+      app.currentSpeech = null;
+      resolve() 
+    }
       window.speechSynthesis.speak(u)
     })
   }
@@ -642,4 +1073,54 @@ $$('.nav-btn').forEach((btn) => {
     gain.gain.setValueAtTime(0.0001, now); gain.gain.linearRampToValueAtTime(0.03, now + 0.03); gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
     osc.connect(gain); gain.connect(ctx.destination); osc.start(now); osc.stop(now + 0.58)
   }
+// --- TTS 播报函数 ---
+  function speak(text) {
+    console.log('播报:', text);
+    if ('speechSynthesis' in window) {
+      const utter = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utter);
+    }
+  }
+
+  // --- 页面导航函数 ---
+  let currentScreen = 'home';
+  function navigateToScreen(screen) {
+    currentScreen = screen;
+    const content = $('#content-area');
+    content.innerHTML = '';
+
+    if (screen === 'healing') {
+      startHealingFlow(content);
+    } else {
+      // 保留原有页面切换逻辑
+      if (typeof showScreenContent === 'function') {
+        showScreenContent(screen, content);
+      } else {
+        content.innerHTML = `<p class="instruction-text">当前页面：${SCREEN_TITLES[screen]}</p>`;
+      }
+    }
+  }
+
+
+  // --- 训练和 Stroop 报告播报模板 ---
+  function trainingReport(correctRate, avgTime) {
+    speak(`训练结束啦。您这次的正确率是百分之 ${correctRate} ，平均反应时间是 ${avgTime} 秒。`);
+    if (correctRate < 60) {
+      speak('这次好像分心的地方比较多。大脑这会儿可能有点累了。建议您去声景疗愈休息调整一下，按空格键就能直接过去。');
+    } else {
+      speak('表现不错！训练完了您可以去试试注意力检测挑战一下自己，按J键就行；或者去声景疗愈放松放松，按空格键。');
+    }
+  }
+
+  function stroopReport(level, resilienceScore) {
+    speak(`测试结束。您的报告等级为 ${level}，韧性得分为 ${resilienceScore}。`);
+    if (level >= 'B') {
+      speak('这个任务确实挺费脑子的，您可能有点用脑过度了。建议您先去声景疗愈那里用自然声音给大脑充充电，按空格键就能过去。');
+    } else {
+      speak('您对注意力的控制挺稳的。测试完累了的话，可以去认知训练做点简单的听粗细游戏放松脑子，按F键；或者去声景疗愈深度休息，按空格键。');
+    }
+  }
+
+
 })()
+
