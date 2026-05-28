@@ -1,13 +1,19 @@
 (function () {
   const STORAGE_KEY = 'auditory-mind-space/contest-local-v3'
-  const SCREENS = ['home', 'training', 'assessment', 'healing']
-  const SCREEN_TITLES = { home: '首页', training: '认知训练', assessment: '注意力检测', healing: '声景疗愈' }
+  const ADMIN_STORAGE_KEY = 'wisdombridge-admin-data'
+  const SCREENS = ['home', 'training', 'assessment', 'healing', 'admin']
+  const SCREEN_TITLES = { home: '首页', training: '认知训练', assessment: '注意力检测', healing: '声景疗愈', admin: '后台管理' }
   const COLORS = { warm_wood: '温暖木质', soft_sun: '柔亮日光', silver_bell: '清亮铃声', deep_night: '低频夜色' }
   const INTRO ='您现在在首页，这里有三个功能可以选。按键盘 F 键，进入认知训练，听声音粗细来训练大脑的反应力。按键盘 J 键，进入注意力检测，考验一下抗干扰能力。按键盘 空格键，进入声景疗愈，用自然的声音放松心情。请根据您的需要进行选择。'
- 
+
   const BODY_SCAN = '请放松肩膀，把注意力放在呼吸上，从额头到肩颈，再到双手。'
   const $ = (id) => document.getElementById(id)
   const $$ = (s) => Array.from(document.querySelectorAll(s))
+  
+  const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'admin123'
+  }
   
 const BUTTON_INTROS = {
   home1: '首页包含您的个人信息和最近成绩，可以记录节奏签名作为匿名识别方式。',
@@ -54,6 +60,8 @@ const BUTTON_INTROS = {
     audioContext: null,
     soundscapeStop: null,
     soundscapeIntervals: [],
+    currentUser: null,
+    isAdmin: false
   }
   const el = {
     notice: $('notice'), screenTitle: $('screenTitle'), deviceId: $('deviceId'), nicknameInput: $('nicknameInput'),
@@ -81,25 +89,283 @@ const BUTTON_INTROS = {
       o.textContent = COLORS[k]
       el.colorPreference.appendChild(o)
     })
+    bindLoginEvents()
     bindNameModalEvents()
     bind()
-    renderAll()
     
-    // 自动锁定输入框，方便盲人用户使用
+    const savedUser = localStorage.getItem('currentUser')
+    const savedRole = localStorage.getItem('userRole')
+    
+    if (savedUser && savedRole) {
+      app.currentUser = JSON.parse(savedUser)
+      app.isAdmin = savedRole === 'admin'
+      if (app.isAdmin) {
+        loadAdminData()
+      }
+      $('loginModal').classList.add('hidden')
+      document.querySelector('.app').classList.remove('hidden')
+      renderAll()
+      speak('欢迎回来，' + (app.isAdmin ? '管理员' : app.currentUser.nickname))
+    } else {
+      document.querySelector('.app').classList.add('hidden')
+    }
+    
     if (el.nameInput) {
       el.nameInput.focus();
     }
     
-    // 添加点击屏幕播放欢迎语音的功能
     function playWelcomeMessage() {
-      speak('欢迎使用智听心桥。请先输入您的姓名。');
-      // 移除事件监听器，避免重复播放
+      speak('欢迎使用智听心桥。请先登录。');
       document.removeEventListener('click', playWelcomeMessage);
     }
     
-    // 添加点击事件监听器
     document.addEventListener('click', playWelcomeMessage);
   
+  }
+  
+  function bindLoginEvents() {
+    $('userLoginBtn')?.addEventListener('click', () => {
+      $('userLoginBtn').classList.add('active')
+      $('adminLoginBtn').classList.remove('active')
+      app.isAdmin = false
+    })
+    
+    $('adminLoginBtn')?.addEventListener('click', () => {
+      $('adminLoginBtn').classList.add('active')
+      $('userLoginBtn').classList.remove('active')
+      app.isAdmin = true
+    })
+    
+    $('nextToStep2')?.addEventListener('click', () => {
+      if (app.isAdmin) {
+        showLoginStep(3)
+      } else {
+        showLoginStep(2)
+      }
+    })
+    
+    $('backToStep1')?.addEventListener('click', () => showLoginStep(1))
+    $('backToStep1FromAdmin')?.addEventListener('click', () => showLoginStep(1))
+    
+    $('sendCodeBtn')?.addEventListener('click', sendVerificationCode)
+    $('voiceInputBtn')?.addEventListener('click', toggleVoiceInput)
+    $('submitLogin')?.addEventListener('click', handleUserLogin)
+    $('submitAdminLogin')?.addEventListener('click', handleAdminLogin)
+    $('privacyLink')?.addEventListener('click', (e) => {
+      e.preventDefault()
+      $('privacyModal').classList.remove('hidden')
+    })
+    $('closePrivacyModal')?.addEventListener('click', () => {
+      $('privacyModal').classList.add('hidden')
+    })
+    
+    $('logoutBtn')?.addEventListener('click', handleLogout)
+  }
+  
+  function showLoginStep(step) {
+    $$('.login-step').forEach(s => s.classList.remove('active'))
+    $(`loginStep${step}`)?.classList.add('active')
+  }
+  
+  function sendVerificationCode() {
+    const phone = $('phoneInput').value
+    if (!/^1[3-9]\d{9}$/.test(phone)) {
+      alert('请输入有效的手机号')
+      return
+    }
+    
+    const btn = $('sendCodeBtn')
+    btn.disabled = true
+    btn.textContent = '60秒后重发'
+    let count = 60
+    const timer = setInterval(() => {
+      count--
+      btn.textContent = count + '秒后重发'
+      if (count <= 0) {
+        clearInterval(timer)
+        btn.disabled = false
+        btn.textContent = '获取验证码'
+      }
+    }, 1000)
+    
+    alert('验证码已发送到您的手机（模拟）')
+  }
+  
+  let voiceRecognition = null
+  
+  function toggleVoiceInput() {
+    const btn = $('voiceInputBtn')
+    
+    if (voiceRecognition && voiceRecognition.state === 'listening') {
+      voiceRecognition.stop()
+      btn.classList.remove('recording')
+      return
+    }
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('您的浏览器不支持语音识别')
+      return
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    voiceRecognition = new SpeechRecognition()
+    voiceRecognition.lang = 'zh-CN'
+    voiceRecognition.interimResults = false
+    voiceRecognition.maxAlternatives = 1
+    
+    voiceRecognition.onstart = () => {
+      btn.classList.add('recording')
+      alert('请开始说话，正在识别...')
+    }
+    
+    voiceRecognition.onresult = (event) => {
+      const result = event.results[0][0].transcript
+      $('phoneInput').value = result.replace(/\D/g, '').substring(0, 11)
+      btn.classList.remove('recording')
+    }
+    
+    voiceRecognition.onerror = () => {
+      btn.classList.remove('recording')
+      alert('语音识别失败，请重试')
+    }
+    
+    voiceRecognition.onend = () => {
+      btn.classList.remove('recording')
+    }
+    
+    voiceRecognition.start()
+  }
+  
+  function handleUserLogin() {
+    const phone = $('phoneInput').value
+    const code = $('codeInput').value
+    const privacyAgree = $('privacyAgree').checked
+    const researchAgree = $('researchAgree').checked
+    
+    if (!/^1[3-9]\d{9}$/.test(phone)) {
+      alert('请输入有效的手机号')
+      return
+    }
+    
+    if (!/^\d{6}$/.test(code)) {
+      alert('请输入6位验证码')
+      return
+    }
+    
+    if (!privacyAgree) {
+      alert('请先同意隐私协议')
+      return
+    }
+    
+    const userData = {
+      phone: phone,
+      nickname: phone.substring(0, 3) + '****' + phone.substring(7),
+      agreedPrivacy: true,
+      agreedResearch: researchAgree,
+      createdAt: new Date().toISOString()
+    }
+    
+    app.currentUser = userData
+    app.isAdmin = false
+    localStorage.setItem('currentUser', JSON.stringify(userData))
+    localStorage.setItem('userRole', 'user')
+    
+    saveUserDataToAdmin(userData)
+    
+    $('loginModal').classList.add('hidden')
+    document.querySelector('.app').classList.remove('hidden')
+    app.state.profile.nickname = userData.nickname
+    saveState()
+    renderAll()
+    speak('登录成功，欢迎使用智听心桥')
+  }
+  
+  function handleAdminLogin() {
+    const username = $('adminUsername').value
+    const password = $('adminPassword').value
+    
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      app.currentUser = { username: '管理员' }
+      app.isAdmin = true
+      localStorage.setItem('currentUser', JSON.stringify(app.currentUser))
+      localStorage.setItem('userRole', 'admin')
+      loadAdminData()
+      
+      $('loginModal').classList.add('hidden')
+      document.querySelector('.app').classList.remove('hidden')
+      renderAll()
+      speak('管理员登录成功')
+    } else {
+      alert('账号或密码错误')
+    }
+  }
+  
+  function handleLogout() {
+    app.currentUser = null
+    app.isAdmin = false
+    localStorage.removeItem('currentUser')
+    localStorage.removeItem('userRole')
+    
+    document.querySelector('.app').classList.add('hidden')
+    $('loginModal').classList.remove('hidden')
+    showLoginStep(1)
+    
+    $('phoneInput').value = ''
+    $('codeInput').value = ''
+    $('privacyAgree').checked = false
+    $('researchAgree').checked = false
+    $('adminUsername').value = ''
+    $('adminPassword').value = ''
+    
+    speak('已退出登录')
+  }
+  
+  function saveUserDataToAdmin(userData) {
+    const adminData = loadAdminData()
+    const existingUser = adminData.users.find(u => u.phone === userData.phone)
+    
+    if (existingUser) {
+      existingUser.agreedResearch = userData.agreedResearch
+      existingUser.lastLogin = new Date().toISOString()
+    } else {
+      adminData.users.push({
+        ...userData,
+        userId: 'user-' + Date.now(),
+        lastLogin: new Date().toISOString(),
+        sessionCount: 0
+      })
+    }
+    
+    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminData))
+  }
+  
+  function loadAdminData() {
+    try {
+      const data = localStorage.getItem(ADMIN_STORAGE_KEY)
+      return data ? JSON.parse(data) : {
+        users: [],
+        totalSessions: 0,
+        totalUsers: 0,
+        weeklyData: [],
+        systemStats: {
+          totalTests: 0,
+          avgScore: 0,
+          activeUsers: 0
+        }
+      }
+    } catch {
+      return {
+        users: [],
+        totalSessions: 0,
+        totalUsers: 0,
+        weeklyData: [],
+        systemStats: {
+          totalTests: 0,
+          avgScore: 0,
+          activeUsers: 0
+        }
+      }
+    }
   }
 
   function bindNameModalEvents() {
@@ -381,11 +647,26 @@ const BUTTON_KEYS = {
     renderReport()
     renderHistory()
     renderHealing()
+    renderAdmin()
   }
 
   function renderScreenState() {
-    SCREENS.forEach((screen) => { const node = $('screen-' + screen); if (node) node.classList.toggle('active', screen === app.screen) })
-    $$('.nav [data-screen]').forEach((b) => b.classList.toggle('active', b.dataset.screen === app.screen))
+    SCREENS.forEach((screen) => { 
+      const node = $('screen-' + screen); 
+      if (node) {
+        const isAdminScreen = screen === 'admin'
+        const canAccess = isAdminScreen ? app.isAdmin : true
+        node.classList.toggle('active', screen === app.screen && canAccess)
+      }
+    })
+    $$('.nav [data-screen]').forEach((b) => {
+      const isAdminBtn = b.dataset.screen === 'admin'
+      if (isAdminBtn) {
+        b.classList.toggle('active', b.dataset.screen === app.screen && app.isAdmin)
+      } else {
+        b.classList.toggle('active', b.dataset.screen === app.screen)
+      }
+    })
     el.screenTitle.textContent = SCREEN_TITLES[app.screen]
   }
 
@@ -474,6 +755,90 @@ const BUTTON_KEYS = {
       item.addEventListener('click', () => { app.selectedPlanKind = plan.kind; renderHealing() })
       el.planList.appendChild(item)
     })
+  }
+  
+  function renderAdmin() {
+    const adminData = loadAdminData()
+    const adminNav = $('admin1')
+    
+    if (app.isAdmin) {
+      adminNav.style.display = 'inline-flex'
+    } else {
+      adminNav.style.display = 'none'
+      switchScreen('home')
+      return
+    }
+    
+    $('adminTotalUsers').textContent = adminData.totalUsers || 0
+    $('adminActiveUsers').textContent = adminData.systemStats.activeUsers || 0
+    $('adminTotalTests').textContent = adminData.systemStats.totalTests || 0
+    $('adminAvgScore').textContent = adminData.systemStats.avgScore || 0
+    
+    renderAdminUserList(adminData.users)
+  }
+  
+  function renderAdminUserList(users) {
+    const list = $('adminUserList')
+    
+    if (!users || users.length === 0) {
+      list.innerHTML = '<p class="empty-text">暂无用户数据</p>'
+      return
+    }
+    
+    list.innerHTML = ''
+    users.forEach((user, index) => {
+      const item = document.createElement('button')
+      item.className = 'user-item'
+      item.innerHTML = `
+        <span class="user-index">#${index + 1}</span>
+        <div class="user-info">
+          <strong>${user.nickname}</strong>
+          <small>测试次数: ${user.sessionCount || 0} | 科研同意: ${user.agreedResearch ? '是' : '否'}</small>
+        </div>
+      `
+      item.addEventListener('click', () => renderAdminUserDetail(user))
+      list.appendChild(item)
+    })
+  }
+  
+  function renderAdminUserDetail(user) {
+    const detail = $('adminUserDetail')
+    
+    if (!user.testHistory || user.testHistory.length === 0) {
+      detail.innerHTML = `
+        <div class="user-header">
+          <h4>${user.nickname}</h4>
+          <p class="empty-text">该用户暂无测试记录</p>
+        </div>
+      `
+      return
+    }
+    
+    let historyHtml = '<div class="user-header"><h4>' + user.nickname + '</h4><small>共 ' + user.testHistory.length + ' 次测试</small></div>'
+    historyHtml += '<div class="history-list">'
+    
+    user.testHistory.slice().reverse().forEach((test, index) => {
+      historyHtml += `
+        <div class="history-item">
+          <span class="history-date">${formatDate(test.createdAt)}</span>
+          <div class="history-score">
+            <strong>等级 ${test.grade}</strong>
+            <span>${test.score} 分</span>
+          </div>
+          <div class="history-details">
+            <small>注意力得分: ${test.attentionScore}</small>
+            <small>正确率: ${test.accuracy}%</small>
+            <small>反应时间: ${test.avgReactionTime}ms</small>
+          </div>
+          <div class="history-suggestion">
+            <small>建议: ${test.suggestion || '无'}</small>
+          </div>
+        </div>
+      `
+    })
+    
+    historyHtml += '</div>'
+    detail.innerHTML = historyHtml
   }
 
   function toggleAnswerActive(nodes, active) { nodes.forEach((node) => node.classList.toggle('active', active)) }
@@ -673,17 +1038,68 @@ function startAssessmentPractice() {
       return speak('训练完成。正确率 ' + summary.accuracy + '。')
     }
     const report = buildReport(summary, app.state.questionnaire)
-    const session = { id: 'session-' + Date.now(), createdAt: new Date().toISOString(), mode: app.run.mode, stroop: summary, questionnaire: clone(app.state.questionnaire), report: report, trialResults: app.run.results.slice() }
+    const session = { 
+      id: 'session-' + Date.now(), 
+      createdAt: new Date().toISOString(), 
+      mode: app.run.mode, 
+      stroop: summary, 
+      questionnaire: clone(app.state.questionnaire), 
+      report: report, 
+      trialResults: app.run.results.slice(),
+      userId: app.currentUser?.phone || 'unknown'
+    }
     app.state.sessions.unshift(session)
     app.selectedSessionId = session.id
     app.selectedPlanKind = report.primaryPlan.kind
     app.reportLayerIndex = 0
     app.run.status = 'finished'
     saveState()
+    saveTestDataToAdmin(session)
     renderProfile(); renderReport(); renderHistory(); renderHealing()
     switchScreen('assessment')
     notice('检测完成')
     speak(report.layers[0])
+  }
+  
+  function saveTestDataToAdmin(session) {
+    if (!app.currentUser?.agreedResearch) return
+    
+    const adminData = loadAdminData()
+    const user = adminData.users.find(u => u.phone === app.currentUser.phone)
+    
+    if (user) {
+      user.sessionCount = (user.sessionCount || 0) + 1
+      if (!user.testHistory) user.testHistory = []
+      user.testHistory.push({
+        sessionId: session.id,
+        createdAt: session.createdAt,
+        grade: session.report.grade,
+        score: session.report.resilienceIndex,
+        attentionScore: session.stroop.attentionScore,
+        accuracy: session.stroop.accuracy,
+        avgReactionTime: session.stroop.averageReactionTime,
+        suggestion: session.report.layers[2]
+      })
+    }
+    
+    adminData.totalSessions = (adminData.totalSessions || 0) + 1
+    adminData.systemStats.totalTests = (adminData.systemStats.totalTests || 0) + 1
+    
+    const allScores = []
+    adminData.users.forEach(u => {
+      if (u.testHistory) {
+        u.testHistory.forEach(t => allScores.push(t.score))
+      }
+    })
+    adminData.systemStats.avgScore = allScores.length > 0 
+      ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length)
+      : 0
+    adminData.systemStats.activeUsers = adminData.users.filter(u => 
+      u.lastLogin && new Date(u.lastLogin) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    ).length
+    adminData.totalUsers = adminData.users.length
+    
+    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminData))
   }
 
   function createStimuli(count) {

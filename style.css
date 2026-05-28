@@ -470,28 +470,370 @@ small,
     }
 }
 
-/* 确保弹窗隐藏逻辑生效 
-.hidden {
-  display: none !important;
+/* 登录页面样式 */
+.login-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: 
+        radial-gradient(circle at top left, rgba(240, 177, 100, 0.14), transparent 28%),
+        linear-gradient(180deg, #090909 0%, #050505 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
-/* 可选：优化弹窗样式，避免遮挡 
-.name-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  gap: 16px;
-  padding: 20px;
+
+.login-modal.hidden {
+    display: none;
 }
-.name-modal input, .name-modal button {
-  padding: 8px 16px;
-  font-size: 16px;
-  min-width: 200px;
-}*/
+
+.login-container {
+    width: min(480px, 100%);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    border-radius: 18px;
+    padding: 32px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-header h1 {
+    font-size: clamp(32px, 6vw, 48px);
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+.login-step {
+    display: none;
+}
+
+.login-step.active {
+    display: block;
+}
+
+.login-step h2 {
+    font-size: 20px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.role-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.role-btn {
+    flex: 1;
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line);
+    transition: all 0.3s;
+}
+
+.role-btn.active {
+    background: linear-gradient(135deg, rgba(240, 177, 100, 0.34), rgba(255, 132, 84, 0.28));
+    border-color: rgba(240, 177, 100, 0.5);
+}
+
+.form-field {
+    margin-bottom: 16px;
+}
+
+.form-field span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.input-group input {
+    flex: 1;
+}
+
+.voice-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.voice-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.voice-btn.recording {
+    background: linear-gradient(135deg, rgba(240, 177, 100, 0.34), rgba(255, 132, 84, 0.28));
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.privacy-agreement {
+    margin: 16px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.checkbox-label a {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    background: linear-gradient(135deg, rgba(240, 177, 100, 0.34), rgba(255, 132, 84, 0.28));
+    border: 1px solid rgba(240, 177, 100, 0.5);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.privacy-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.privacy-modal.hidden {
+    display: none;
+}
+
+.privacy-content {
+    width: min(480px, 100%);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    border-radius: 18px;
+    padding: 32px;
+}
+
+.privacy-content h3 {
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+
+.privacy-text {
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.privacy-text ol {
+    padding-left: 20px;
+}
+
+.privacy-text li {
+    margin-bottom: 8px;
+}
+
+.logout-btn {
+    display: none;
+}
+
+.app:not(.hidden) .logout-btn {
+    display: inline-flex;
+}
+
+/* 后台管理页面样式 */
+.admin-stats {
+    margin-bottom: 16px;
+}
+
+.stat-card {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.stat-card strong {
+    font-size: 32px;
+    color: var(--accent);
+}
+
+.admin-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.user-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.user-item:hover {
+    border-color: rgba(240, 177, 100, 0.5);
+}
+
+.user-index {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(240, 177, 100, 0.15);
+    border-radius: 50%;
+    font-size: 12px;
+    color: var(--accent);
+}
+
+.user-info strong {
+    display: block;
+    font-size: 14px;
+}
+
+.user-info small {
+    font-size: 12px;
+}
+
+.admin-detail {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.user-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+}
+
+.user-header h4 {
+    margin: 0 0 4px;
+    font-size: 18px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.history-item {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.history-date {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.history-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.history-score strong {
+    font-size: 20px;
+    color: var(--accent);
+}
+
+.history-details {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.history-details small {
+    font-size: 12px;
+}
+
+.history-suggestion {
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-suggestion small {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.empty-text {
+    color: var(--muted);
+    text-align: center;
+    padding: 20px;
+}
+
+/* 响应式适配 */
+@media (max-width: 640px) {
+    .login-container {
+        padding: 24px 16px;
+    }
+    
+    .role-selector {
+        flex-direction: column;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .voice-btn {
+        width: 100%;
+    }
+    
+    .admin-stats,
+    .grid.two {
+        grid-template-columns: 1fr;
+    }
+}

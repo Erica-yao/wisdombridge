@@ -8,12 +8,88 @@
 </head>
 <body>
     
-    <div class="name-modal" id="nameModal">
-        <h1>智听心桥</h1>
-        <p class="subtle">基于听觉认知科学的心理韧性训练和认知健康管理平台</p>
-        <input type="text" id="nameInput" placeholder="请输入您的姓名">
-        <br>
-        <button id="startBtn">开始</button>
+    <div id="loginModal" class="login-modal">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>智听心桥</h1>
+                <p class="subtle">基于听觉认知科学的心理韧性训练和认知健康管理平台</p>
+            </div>
+            
+            <div id="loginStep1" class="login-step active">
+                <h2>登录方式</h2>
+                <div class="role-selector">
+                    <button id="userLoginBtn" class="role-btn active">用户登录</button>
+                    <button id="adminLoginBtn" class="role-btn">管理员登录</button>
+                </div>
+                <button id="nextToStep2" class="primary-btn">下一步</button>
+            </div>
+            
+            <div id="loginStep2" class="login-step">
+                <h2>用户注册/登录</h2>
+                <label class="form-field">
+                    <span>手机号</span>
+                    <div class="input-group">
+                        <input id="phoneInput" type="tel" placeholder="请输入手机号" maxlength="11">
+                        <button id="voiceInputBtn" class="voice-btn" title="语音输入">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 19c-2 0-4-1-5-3v-4H6L4 20h12l-2-7h-1v4c-1 2-3 3-5 3z"/>
+                                <path d="M9 9l2 2 4-4"/>
+                            </svg>
+                        </button>
+                    </div>
+                </label>
+                <label class="form-field">
+                    <span>验证码</span>
+                    <div class="input-group">
+                        <input id="codeInput" type="text" placeholder="请输入验证码" maxlength="6">
+                        <button id="sendCodeBtn" class="ghost">获取验证码</button>
+                    </div>
+                </label>
+                <div class="privacy-agreement">
+                    <label class="checkbox-label">
+                        <input id="privacyAgree" type="checkbox">
+                        <span>我已阅读并同意</span>
+                        <a href="#" id="privacyLink">《隐私协议》</a>
+                    </label>
+                    <label class="checkbox-label">
+                        <input id="researchAgree" type="checkbox">
+                        <span>同意将我的测试数据用于科研目的（匿名化处理）</span>
+                    </label>
+                </div>
+                <button id="submitLogin" class="primary-btn">登录/注册</button>
+                <button id="backToStep1" class="ghost">返回</button>
+            </div>
+            
+            <div id="loginStep3" class="login-step">
+                <h2>管理员登录</h2>
+                <label class="form-field">
+                    <span>管理员账号</span>
+                    <input id="adminUsername" type="text" placeholder="请输入管理员账号">
+                </label>
+                <label class="form-field">
+                    <span>管理员密码</span>
+                    <input id="adminPassword" type="password" placeholder="请输入管理员密码">
+                </label>
+                <button id="submitAdminLogin" class="primary-btn">登录</button>
+                <button id="backToStep1FromAdmin" class="ghost">返回</button>
+            </div>
+        </div>
+        
+        <div id="privacyModal" class="privacy-modal hidden">
+            <div class="privacy-content">
+                <h3>隐私协议</h3>
+                <div class="privacy-text">
+                    <p>智听心桥重视您的隐私保护。我们承诺：</p>
+                    <ol>
+                        <li>您的个人信息将被严格保密，不会泄露给第三方</li>
+                        <li>测试数据将进行匿名化处理后存储</li>
+                        <li>您可以随时选择退出数据收集</li>
+                        <li>若您同意用于科研，数据将仅用于学术研究目的</li>
+                    </ol>
+                </div>
+                <button id="closePrivacyModal" class="primary-btn">我已知晓</button>
+            </div>
+        </div>
     </div>
 
     <div class="app">
@@ -26,6 +102,7 @@
             <div class="hero-actions">
                 <button id="playIntro" class="ghost">播放引导</button>
                 <div id="notice" class="notice" aria-live="polite">准备就绪</div>
+                <button id="logoutBtn" class="ghost logout-btn">退出登录</button>
             </div>
         </header>
 
@@ -35,6 +112,7 @@
                 <button data-screen="training" class="nav-btn" id="training1">训练</button>
                 <button data-screen="assessment" class="nav-btn" id="assessment1">检测</button>
                 <button data-screen="healing" class="nav-btn" id="healing1">疗愈</button>
+                <button data-screen="admin" class="nav-btn admin-nav" id="admin1" style="display:none">后台管理</button>
             </nav>
             <div class="page-actions">
                 <button id="prevScreen" class="ghost">上一页</button>
@@ -212,6 +290,51 @@
                     <div id="planList" class="grid three"></div>
                     <div class="row">
                         <button id="stopHealing" class="ghost">停止疗愈</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-admin" class="screen">
+                <div class="panel">
+                    <div class="panel-title">
+                        <h2>后台管理</h2>
+                        <div class="row">
+                            <button id="refreshAdminData" class="ghost">刷新数据</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid four admin-stats">
+                        <div class="stat-card">
+                            <span class="stat-label">总用户数</span>
+                            <strong id="adminTotalUsers">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">活跃用户</span>
+                            <strong id="adminActiveUsers">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">总测试次数</span>
+                            <strong id="adminTotalTests">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">平均得分</span>
+                            <strong id="adminAvgScore">0</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="grid two">
+                        <div class="card">
+                            <h3>用户列表</h3>
+                            <div id="adminUserList" class="admin-list">
+                                <p class="empty-text">暂无数据</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>用户测试详情</h3>
+                            <div id="adminUserDetail" class="admin-detail">
+                                <p class="empty-text">请选择用户查看详情</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
